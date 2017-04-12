@@ -2,27 +2,58 @@
 
 import React from 'react';
 import axios from 'axios';
+import ToggleDisplay from 'react-toggle-display';
 
 import Title from './Title.jsx';
 import Subtitle from './Subtitle.jsx';
-import WhichView from './ReadcastTopstories.jsx';
+import WhichView from './WhichView.jsx';
 // import HeaderNavigation from './Navbar.jsx';
 // {import SignupButton from './SignupButton'; }
 import SignUpForm from './SignupForm.jsx';
 import TransFormEr from './TransFormer.jsx';
 import ArticleList from './ArticleList.jsx';
 import ArticleEntry from './ArticleEntry.jsx';
+import TopStories from './TopStories.jsx';
 import Player from './Player.jsx';
 import Confirm from './confirm.jsx';
 import isValidUrl from '../helpers/urlValidation.js';
 import {Loading, ErrorAlert} from './Alerts.jsx';
+
+const exportOptions = {
+    voices : [
+      {name: '--American English--'},
+      {flag: 'us', name: 'Joanna'},
+      {flag: 'us', name: 'Salli'},
+      {flag: 'us', name: 'Kendra'},
+      {flag: 'us', name: 'Kimberly'},
+      {flag: 'us', name: 'Ivy'},
+      {flag: 'us', name: 'Joey'},
+      {flag: 'us', name: 'Justin'},
+      {name: '--British English--'},
+      {flag: 'uk', name: 'Amy'},
+      {flag: 'uk', name: 'Emma'},
+      {flag: 'uk', name: 'Brian'},
+      {name: '--Australian English--'},
+      {flag: 'au', name: 'Nicole'},
+      {flag: 'uk', name: 'Russell'},
+      {name: '--Indian English--'},
+      {flag: 'in', name: 'Raveena'},
+      {name: '--Welsh English--'},
+      {flag: 'wa', name: 'Geraint'}
+    ],
+    methods : [
+      {id: "stream", method: 'Stream It'},
+      {id: "link", method: 'Link It'}
+    ]
+  }
 
 
 class App extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			items: [],
+			library: [],
+			headlines: [],
 			hasErrored: false,
 			isLoading: false,
 			failMessage: '',
@@ -40,7 +71,17 @@ class App extends React.Component {
 			showConfirm: false,
 			lastMethod: '',
 			lastUrl: '',
+			topStoryMode: false
 		};
+	}
+
+	addDeliveryMethods(){
+		if (this.state.user.email) {
+    		exportOptions.methods.push({id: "email", method: 'Email It'});
+  	}
+		if (this.state.user.phone) {
+    		exportOptions.methods.push({id: "phone", method: 'Text It'});
+  	}
 	}
 
 	// {for getting entire article list}
@@ -52,9 +93,22 @@ class App extends React.Component {
 					if (article.publication_date) {article.publication_date = this.cleanDate(article.publication_date)};
 					article.est_time = this.cleanTime(article.est_time);
 				});
-				this.setState({ isLoading: false, items: (res.data.reverse()) });
+				this.setState({ isLoading: false, library: (res.data.reverse()) });
 			})
 			.catch((err) => this.setState({ failMessage: ('Unable to retrieve articles'), hasErrored: true }));
+	}
+
+	getTopStories(sources){
+		this.setState({ isLoading: true });
+		axios.post('/topStories', {sources: sources})
+		.then((res) => {
+				res.data.forEach((article) => {
+					if (article.publication_date) {article.publication_date = this.cleanDate(article.publication_date)};
+					article.est_time = this.cleanTime(article.est_time);
+				});
+				this.setState({ isLoading: false, headlines: (res.data.reverse()) });
+			})
+			.catch((err) => this.setState({ failMessage: ('Unable to retrieve headlines'), hasErrored: true }));
 	}
 
 	cleanDate(entry) {
@@ -69,7 +123,7 @@ class App extends React.Component {
 
 // {helper function for postUserLink}
 	addOne(obj) {
-		let result = this.state.items;
+		let result = this.state.library;
 		obj.est_time = this.cleanTime(obj.est_time);
 		if (obj.publication_date) {
 			obj.publication_date = this.cleanDate(obj.publication_date);
@@ -90,7 +144,7 @@ class App extends React.Component {
 		this.setState({ isLoading: true });
 		axios.post('/requrl', {userId: this.state.user.id, requrl: url})
 		.then((res) => {
-			this.setState({ isLoading: false, items: (this.addOne(res.data)) });
+			this.setState({ isLoading: false, library: (this.addOne(res.data)) });
 			return;
 		})
 		.catch((err) => this.setState({ failMessage: (res.data.error || 'Unable to fetch that link'), hasErrored: true }));
@@ -113,7 +167,7 @@ class App extends React.Component {
 
 // {helper function for deleteArticle}
 	deleteOne(resObj) {
-		let result = this.state.items;
+		let result = this.state.library;
 		let index = this.findIndex(result, resObj.deleted);
 		result.splice(index, 1);
 		return result;
@@ -124,7 +178,7 @@ class App extends React.Component {
 		// {this.setState({ isLoading: true });}
 		axios.post('/deleteOne', { userId: this.state.user.id, url: url })
 		.then((res) => {
-			this.setState({ isLoading: false, items: (this.deleteOne(res.data)) });
+			this.setState({ isLoading: false, library: (this.deleteOne(res.data)) });
 			// {=> TODO: figure out how to alert user that article was deleted}
 		})
 		.catch((err) => this.setState({ hasErrored: true, failMessage: (res.data.error ||'Unable to delete that article') }));
@@ -160,8 +214,14 @@ class App extends React.Component {
 
 	// {invokes ajax call to fetch data for the ArticleList component}
 	componentDidMount() {
+		this.addDeliveryMethods();
 		this.getReadingList();
 						// console.log('app.js getReadingList l 42. full db returned: ', res.data;
+	}
+
+	toggleView() {
+		let currentState = this.state.topStoryMode;
+		this.setState({topStoryMode: !currentState});
 	}
 
 	toggleConfirm() {
@@ -177,9 +237,17 @@ class App extends React.Component {
 				<Subtitle subtitle='your reading backlog solved'/>
 				{this.state.hasErrored && <ErrorAlert errorMessage={this.state.failMessage}/>}
 				<TransFormEr postIt={this.postUserLink.bind(this)}/>
+				<WhichView toggleView={this.toggleView.bind(this)}/>
 				{this.state.isLoading && <Loading />}
-				<WhichView readcast='Your Read.casts'/>
-				<ArticleList articles={this.state.items} user={this.state.user} deleteIt={this.deleteArticle.bind(this)} convertIt={this.convertArticle.bind(this)} />
+				<ToggleDisplay show={!this.state.topStoryMode}>
+					<ArticleList articles={this.state.library} user={this.state.user} deleteIt={this.deleteArticle.bind(this)} convertIt={this.convertArticle.bind(this)} exportOptions={exportOptions} topStoryMode={this.state.topStoryMode} />
+				</ToggleDisplay>
+				<ToggleDisplay show={this.state.topStoryMode}>
+					{/*<div>
+						<h1>Oh hi!</h1>
+					</div>*/}
+					<TopStories getTopStories={this.getTopStories.bind(this)} headlines={this.state.headlines} user={this.state.user} deleteIt={this.deleteArticle.bind(this)} convertIt={this.convertArticle.bind(this)} exportOptions={exportOptions} topStoryMode={this.state.topStoryMode} />
+				</ToggleDisplay>
 				<div id="player_container">
 					<Player track={this.state.nowPlaying}/>
 				</div>
@@ -187,36 +255,6 @@ class App extends React.Component {
 			</div>
 		);
 
-		{/*// // => FIXIT: when we get this we should re-render the original page, as currently it just dies here (blank screen + this message)
-		// if (this.state.hasErrored) {
-		// 	return (
-		// 		<div>
-		// 			<p>There was an error when loading the data</p>
-		// 			<p>{this.state.failMessage}</p>
-		// 		</div>
-		// 	);
-		// }
-
-		// if (this.state.isLoading) {
-		// 	return (
-		// 		<div>
-		// 		  <Title title='Hello, ReadCast.ly!'/>
-		// 			<TransFormEr postIt={this.postUserLink.bind(this)}/>
-		// 			<p>Loading...</p>
-		// 			<img className="spinner" src='./../images/spiffygif_46x46.gif' height="42" />
-		// 		  <ArticleList articles={this.state.items} deleteIt={this.deleteArticle.bind(this)}/>
-		// 		</div>
-		// 	);
-		// }
-
-		// return(
-		// 	<div>
-		// 		<Title title='Hello, ReadCast.ly!'/>
-
-		// 		<TransFormEr postIt={this.postUserLink.bind(this)}/>
-		// 		<ArticleList articles={this.state.items} deleteIt={this.deleteArticle.bind(this)}/>
-		// 	</div>
-		// );*/}
 	}
 }
 

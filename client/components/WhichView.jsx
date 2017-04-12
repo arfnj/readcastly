@@ -1,28 +1,19 @@
 // Readcast vs Top stories selector component
 
 import React from 'react';
+import Switch from 'react-bootstrap-switch';
 import { Button, Col } from 'react-bootstrap';
 
 class WhichView extends React.Component {
-  constructor() {
-		super();
+  constructor(props) {
+		super(props);
 	}
-
-  // const ShowReadcasts = function() {
-  //   console.log('firing ShowReadcasts...')
-  // }
-
-  // function ShowLibrary () {
-  //   console.log('firing ShowLibrary...')
-  // }
-
 
   render() {
     return (
       <Col md={8} mdOffset={2} className="readcasts-topstories">
-        <Button bsStyle="primary">Your readcasts</Button>
-        <Button bsStyle="default">Top stories</Button>
-        <div><br></br></div>
+          <Switch bsSize="large" onColor="warning" offColor="warning" onChange={this.props.toggleView.bind(this)} />
+          <div><br></br></div>
       </Col>
     );
   }

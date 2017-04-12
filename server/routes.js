@@ -6,6 +6,7 @@ const mercury = require('./apis/mercuryController');
 const news = require('./apis/newsController');
 const mailer = require('./apis/mailController');
 const texter = require('./apis/textController');
+// const polly = require('./apis/pollyController');
 
 // To be written and passed into routes between endpoint and function
 // const isLoggedIn = function(){};

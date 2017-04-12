@@ -81,7 +81,8 @@ class ArticleEntry extends React.Component {
 		  			{this.props.article.publication_date && <div className="article-publishDate"><span>{this.props.article.publication_date}</span></div>}
 		  			{this.props.article.source_name && <div className="article-source"><span><i>{this.props.article.source_name}</i></span></div>}
 		  			{this.props.article.excerpt && <div className="article-excerpt"><span>Excerpt: </span><span>{this.props.article.excerpt}</span></div>}
-		  			{this.props.article && <Button bsStyle="danger" bsSize="xsmall" onClick={() => this.props.deleteIt(this.props.article.url)}>Remove From Library</Button>}
+		  			{!this.props.topStoryMode && <Button bsStyle="danger" bsSize="xsmall" onClick={() => this.props.deleteIt(this.props.article.url)}>Remove From Library</Button>}
+		  			{this.props.topStoryMode && <Button bsStyle="warning" bsSize="xsmall" onClick={() => this.props.deleteIt(this.props.article.url)}>Add to Library</Button>}
 		  		</Col>
 		  	<Col md={2}>
 		  		<div className="article-buttons">
