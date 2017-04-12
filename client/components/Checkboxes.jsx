@@ -26,18 +26,15 @@ let choices = [];
 class Checkboxes extends React.Component {
   constructor(props) {
     super(props);
+
   }
 
   componentWillMount() {
     this.selectedCheckboxes = new Set();
   }
 
-  toggleCheckbox(label) {
-    if (this.selectedCheckboxes.has(label)) {
-      this.selectedCheckboxes.delete(label);
-    } else {
-      this.selectedCheckboxes.add(label);
-    }
+  toggleCheckbox(value) {
+    console.log(value);
   }
 
   handleFormSubmit(formSubmitEvent) {
@@ -49,8 +46,9 @@ class Checkboxes extends React.Component {
   }
 
   createCheckbox(source) {
+    console.log('Making checkboxes!');
     return (
-      <Checkbox inline key="source.id" label="source.name" handleCheckboxChange="this.toggleCheckbox" />
+      <Checkbox inline key={source.id} label={source.name} handleCheckboxChange={this.toggleCheckbox} />
       );
   }
 
@@ -64,7 +62,15 @@ class Checkboxes extends React.Component {
         <Row>
           <Col md={12}>
             <FormGroup onSubmit={this.handleFormSubmit}>
-                {this.createCheckboxes}
+                {sources.map((source) => (
+                      <div className="checkbox" key={source.id}>
+                          <label>
+                          <input type="checkbox" value={source.id} onChange={this.toggleCheckbox}/>
+                          <span className="cr"><i className="cr-icon glyphicon glyphicon-ok"></i></span>
+                            {source.name}
+                          </label>
+                      </div>
+                  ))}
                 <Button bsStyle='primary' type="submit">Get the Top Stories</Button>
             </FormGroup>
           </Col>
