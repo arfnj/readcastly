@@ -15,7 +15,7 @@ class ArticleEntry extends React.Component {
 			<div className="voice-chooser">
 				<FormGroup controlId="voiceSelect">
 	      	<FormControl componentClass="select" value={this.state.voice} onChange={this.handleVoiceChange.bind(this)} placeholder="banana">
-	      	<option value="banana">Voice Choice</option>
+	      	<option value="Joanna">Voice Choice</option>
 	      	{voices.map((voice,i) => {
 	      		return voice.flag ? (<option key={i} value={voice.name} >{voice.name}</option>) :
 	      			(<option key={i} disabled="disabled" >{voice.name}</option>)
@@ -37,7 +37,7 @@ class ArticleEntry extends React.Component {
 			<div className="conversion-chooser">
 				<FormGroup controlId="conversionSelect">
 	      	<FormControl componentClass="select" value={this.state.method} onChange={this.handleMethodChange.bind(this)} placeholder="banana">
-	      	<option value="banana">Delivery Method</option>
+	      	<option value="stream">Delivery Method</option>
 	      	{methods.map((option,i) => (
 						<option key={i} value={option.id} >{option.method}</option>
 					))}

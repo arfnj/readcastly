@@ -45,7 +45,7 @@ class TopStories extends React.Component {
         {/*<Checkboxes sources={sources} getTopStories={this.props.getTopStories.bind(this)} />*/}
         <Grid>
           <Row>
-            <Col md={4} md-offset={4}>
+            <Col md={4} mdOffset={4}>
               <Button bsStyle="success" bsSize="large" onClick={this.randomizer} block>Get headlines from a random source</Button>
             </Col>
           </Row>
