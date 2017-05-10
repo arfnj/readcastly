@@ -61,7 +61,7 @@ class SignupForm extends React.Component {
     })
 		.then((res) => {
 			console.log("POST REQUESTTTTTTTTTTTTTTTTTTTTTT" + res);
-      hashHistory.push('/');
+      hashHistory.push('/app');
       return;
 		});
   }

@@ -4,6 +4,7 @@ const User = require('./database/controllers/usersController');
 const bcrypt = require('bcrypt-nodejs');
 
 const db = require('./database/dbConfig');
+const texter = require('./apis/textController');
 
 module.exports = function(app, passport) {
   // ---SERIALIZE USER---
@@ -35,6 +36,10 @@ module.exports = function(app, passport) {
             return done(null, false, { message: 'Incorrect username.' });
           } else {
             let hashedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+            let verified;
+            texter.verifyNumber(`${req.body.firstName} ${req.body.lastName}`,req.body.phone,function(result) {
+              verified = result;
+            })
             User.addUser(email,hashedPassword,req.body.firstName,req.body.lastName,req.body.phone,req.body.voicePref,req.body.avatar);
 
             User.findByEmail(email).then(function(user) {

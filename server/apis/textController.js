@@ -25,7 +25,23 @@ const sendText = function(req,res,callback) {
     });
 };
 
-module.exports = { sendText: sendText };
+const verifyNumber = function(name, number,callback) {
+  client.outgoingCallerIds.create({
+    friendlyName: name,
+    phoneNumber: number
+  }, function(err, callerId) {
+    if (err) {
+      console.log('ERROR', err);
+      callback(false);
+    } else {
+      console.log('Number verified');
+      console.log(callerId);
+      callback(true);
+    }
+  });
+}
+
+module.exports = { sendText, verifyNumber };
 
 // const deleteMedia = function(message, callback) {
 //   client.messages(message.parent_sid).media(message.sid).delete(function(err, data) {
