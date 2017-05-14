@@ -27,6 +27,8 @@ class SignupForm extends React.Component {
       avatar: '',
       error: '',
       errormsg: '',
+      confirming: false,
+      code: '(please wait)',
       alert: false
     };
 
@@ -130,6 +132,13 @@ class SignupForm extends React.Component {
     return;
   }
 
+  confirmNumber() {
+    this.setState({confirming: true});
+    axios.post('/verifyPhone', {name: `${this.state.firstName} ${this.state.lastName}`, number: this.state.phone})
+      .then(res => this.setState({code: res.data.code}))
+      .catch(err => console.log('error getting phone verification code', err))
+  }
+
   handleFirstNameChange(e) {
     console.log(e.target.value)
     this.setState({ firstName: e.target.value });
@@ -168,6 +177,10 @@ class SignupForm extends React.Component {
     if (this.state.error === 'email' || this.state.error === 'duplicate') {this.setState({email: ''})}
     if (this.state.error === 'password') {this.setState({password: '', password2: ''})}
     if (this.state.error === 'phone') {this.setState({phone: ''})}
+  }
+
+  toggleConfirm() {
+    this.setState({conirming: false});
   }
 
   render() {
@@ -234,6 +247,22 @@ class SignupForm extends React.Component {
             <Button bsStyle="warning" onClick={this.close.bind(this)}>Close</Button>
           </Modal.Footer>
         </Modal>
+        <Modal
+          show={this.state.confirming}
+          onHide={this.toggleConfirm.bind(this)}
+          container={this}
+          aria-labelledby="contained-modal-title"
+        >
+          <Modal.Header>
+            <Modal.Title id="contained-modal-title">Confirm your phone number</Modal.Title>
+          </Modal.Header>
+            <Modal.Body>To confirm your phone number for receiving texts from ReadCast.ly, please enter the following confirmation code when prompted by the incoming call: {this.state.code}</Modal.Body>
+          <Modal.Footer>
+            <Button bsStyle="warning" onClick={this.close.bind(this)}>Number Confirmed!</Button>
+            <Button className="modal-close" bsStyle="success" onClick={this.close.bind(this)}>Send New Code</Button>
+            <Button bsStyle="danger" onClick={this.close.bind(this)}>Proceed Without Confirming</Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </div>
     );
@@ -241,6 +270,16 @@ class SignupForm extends React.Component {
 }
 
 export default SignupForm;
+
+// Adjust functionality of submit button so that if a phone number is entered, it first checks the e-mail, then cleans the phone number, then runs the confirmNumber function
+// Make "Number Confirmed" button on modal proceed with signing user up
+// Make "Send New Code" button on modal re-run confirmNumber function
+// Make "Proceed Without Confirming" button on modal proceed with signing user up but restoring the phone number to ''
+// If no phone number provided, submit button should proceed as designed right now
+// Check if setting e-mail field type to "e-mail" will alleviate need for emailChecker function
+
+
+
 
 {/*}
               <form onSubmit={this.handleSignUp}>

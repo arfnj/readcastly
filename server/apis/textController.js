@@ -25,7 +25,7 @@ const sendText = function(req,res,callback) {
     });
 };
 
-const verifyNumber = function(name, number,callback) {
+const verifyNumber = function(name,number,callback) {
   client.outgoingCallerIds.create({
     friendlyName: name,
     phoneNumber: number
@@ -35,8 +35,8 @@ const verifyNumber = function(name, number,callback) {
       callback(false);
     } else {
       console.log('Number verified');
-      console.log(callerId);
-      callback(true);
+      console.log(callerId.validationCode);
+      callback({"code": callerId.validationCode});
     }
   });
 }
